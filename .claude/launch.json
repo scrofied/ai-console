@@ -1,0 +1,10 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "console",
+      "url": "http://localhost:8787",
+      "port": 8787
+    }
+  ]
+}
