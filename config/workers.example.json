@@ -1,0 +1,79 @@
+{
+  "_howto": "复制本文件为 workers.json 再改。workers.json 是本机配置（含各工具的绝对路径），已被 .gitignore 忽略，不要提交。",
+  "_note": "工具的固定信息（路径、命令行、擅长什么）。谁当指挥官、谁干活、用哪个模型，在工作台页面右上角「设置」里改，会覆盖这里的 role 和 model。bin / launch / runner.cli 都是每台机器不同的路径，必须按本机实际安装位置填写。",
+  "guardrails": {
+    "maxConcurrency": 3,
+    "maxCardsPerBatch": 6,
+    "defaultTimeoutMin": 8,
+    "dailyAutoRunBudget": 80,
+    "autoRedispatchOnce": true
+  },
+  "pollSeconds": 5,
+  "workers": {
+    "codex": {
+      "title": "Codex",
+      "role": "commander",
+      "tier": "L1",
+      "dir": "codex",
+      "enabled": true,
+      "bin": "<改成你本机 Codex 可执行文件路径，例如 C:/Users/you/AppData/Local/OpenAI/Codex/bin/<hash>/codex.exe>",
+      "launch": null,
+      "sandbox": "danger-full-access",
+      "timeoutMin": 8,
+      "strengths": ["写代码", "拆解复杂问题", "批量改文件", "技术验证"],
+      "modelHint": "留空就用 Codex 自己配置里的默认模型。",
+      "note": "本机实测 Windows 下 -s workspace-write 等于只读，只有 danger-full-access 能落盘；cwd 必须是总线根目录。换机器请重新实测。"
+    },
+    "workbuddy": {
+      "title": "WorkBuddy",
+      "role": "worker",
+      "tier": "L2",
+      "dir": "workbuddy",
+      "enabled": true,
+      "bin": null,
+      "launch": "<改成你本机 WorkBuddy 桌面端可执行文件路径，用于「唤起」按钮>",
+      "runner": {
+        "kind": "codebuddy",
+        "autoRun": true,
+        "node": "<改成你本机 node.exe 绝对路径>",
+        "cli": "<改成 app.asar.unpacked/cli/bin/codebuddy 的绝对路径>",
+        "configDir": "<改成 WorkBuddy 的配置目录，例如 C:/Users/you/.workbuddy>",
+        "permissionMode": "acceptEdits",
+        "apiKeyEnv": "CODEBUDDY_API_KEY"
+      },
+      "timeoutMin": 10,
+      "recommendedModel": "",
+      "strengths": ["资料整理", "调研", "写文档和文案", "多步长流程", "定时自动化"],
+      "modelHint": "只列 WorkBuddy 系统自带的模型。命令行随 App 内置，Key 只放在用户环境变量，不要写进本文件。",
+      "note": "命令行随 App 内置（codebuddy），Key 只放在用户环境变量 CODEBUDDY_API_KEY。"
+    },
+    "qoder": {
+      "title": "Qoder",
+      "role": "worker",
+      "tier": "L2",
+      "dir": "qoder",
+      "enabled": true,
+      "bin": null,
+      "launch": "<改成你本机 Qoder 桌面端可执行文件路径>",
+      "timeoutMin": 10,
+      "strengths": ["写代码", "做网页和前端界面", "改工程", "脚本和自动化", "视频渲染"],
+      "modelHint": "注意：留空会用账号默认模型，会消耗账号额度。",
+      "note": "命令行装在用户目录（~/.qoder-cn-cli）。",
+      "runner": {
+        "kind": "qoder",
+        "autoRun": true,
+        "node": "<改成你本机 node.exe 绝对路径>",
+        "cli": "<改成 qodercli.js 的绝对路径>",
+        "permissionMode": "bypass_permissions",
+        "maxTurns": 40,
+        "model": ""
+      },
+      "recommendedModel": ""
+    }
+  },
+  "reviewPolicy": {
+    "noSelfReview": true,
+    "maxAutoRedispatch": 1,
+    "allowSameFamilyFallback": true
+  }
+}
