@@ -1,0 +1,35 @@
+# 本机配置：含各工具绝对路径与个人环境，绝不提交
+config/workers.json
+config/settings.json
+
+# 运行痕迹：事件流、作业记录、临时探针、截图、备份
+console/events/
+console/jobs/
+console/plans/
+console/tmp/
+console/*.log
+shared/daily-log.md
+shared/daily-log.md.bak-*
+
+# 各家 AI 的产出与验收（会随使用不断增长，不进仓库）
+codex/
+workbuddy/
+workbuddyai/
+qoder/
+traework/
+doubao/
+
+# 任务与验收的工作区（保留模板即可，运行态不入库）
+tasks/*.md
+reviews/*.md
+
+# 探测第三方包
+probe/
+
+# 归档
+archive/
+
+# 系统
+.DS_Store
+Thumbs.db
+node_modules/
