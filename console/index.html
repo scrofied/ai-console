@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI 指挥台</title>
+<link rel="stylesheet" href="/ui.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <span class="logo">指</span>
+    <div><div class="brand-name">AI 指挥台</div><div id="brandSub" class="brand-sub">你只管说需求，AI 们分工去做</div></div>
+  </div>
+  <div id="team" class="team"></div>
+  <button id="btnSettings" class="btn-settings" data-act="open-settings"><span class="gear">⚙</span> 设置</button>
+</header>
+
+<div class="layout">
+  <aside class="side">
+    <button id="btnNew" class="btn-new">＋ 新任务</button>
+    <div id="jobList" class="job-list"></div>
+    <label class="side-foot"><input type="checkbox" id="showArchived"> 显示已归档</label>
+  </aside>
+
+  <main class="main">
+    <section id="welcome" class="welcome hidden"></section>
+    <section id="thread" class="thread hidden">
+      <div id="threadHead" class="thread-head"></div>
+      <div id="threadBody" class="thread-body"></div>
+      <button id="toBottom" class="to-bottom" aria-label="回到最新">↓ 最新</button>
+    </section>
+    <footer id="composer" class="composer hidden">
+      <textarea id="composerText" rows="2" placeholder="接着说，比如：标题再短一点 / 再加一个页面……（Ctrl+回车发送）"></textarea>
+      <div class="composer-row">
+        <label class="auto-opt"><input type="checkbox" id="composerAuto" checked> <span class="cmd-name">指挥官</span>拆完后直接开工</label>
+        <button id="composerSend" class="btn primary">发送</button>
+      </div>
+    </footer>
+  </main>
+</div>
+
+<div id="modal" class="modal hidden"><div class="modal-card">
+  <div class="modal-head"><b id="modalTitle"></b><span class="spacer"></span><button class="btn small" id="modalClose">关闭</button></div>
+  <pre id="modalBody" class="modal-body"></pre>
+</div></div>
+
+<div id="settings" class="modal hidden"><div class="modal-card settings-card">
+  <div class="modal-head"><b>设置：谁指挥、谁干活、用哪个模型</b><span class="spacer"></span><button class="btn small" id="settingsClose">关闭</button></div>
+  <div id="settingsBody" class="settings-body"></div>
+  <div class="settings-foot">
+    <span id="settingsHint" class="settings-hint"></span>
+    <span class="spacer"></span>
+    <button class="btn" id="settingsCancel">取消</button>
+    <button class="btn primary" id="settingsSave">保存</button>
+  </div>
+</div></div>
+
+<div id="toast" class="toast hidden"></div>
+
+<script src="/core.js"></script>
+<script src="/render.js"></script>
+<script src="/settings.js"></script>
+<script src="/actions.js"></script>
+</body>
+</html>
