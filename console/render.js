@@ -68,7 +68,7 @@ function renderWelcome() {
     <div id="newAttachTray" class="att-tray"></div>
     <div class="start-row">
       <button id="newAttachBtn" class="attach-btn" title="添加附件（也可以直接粘贴 / 拖进来）">📎</button>
-      <button class="btn primary" data-act="start-job" style="font-size:18px;padding:12px 28px">开始</button>
+      <button class="btn primary lg" data-act="start-job">开始</button>
       <span class="kbd-hint"><kbd>Ctrl</kbd> + <kbd>Enter</kbd> 也可以开始</span>
       <label class="auto-opt"><input type="checkbox" id="newAuto" checked> ${esc(cmdName())} 拆完后直接开工（不勾则先给你看方案）</label>
       <label class="auto-opt"><input type="checkbox" id="newCouncil" checked> 先开参谋会（四位参谋各出一份主意，再由 ${esc(cmdName())} 揉成主线）</label>
