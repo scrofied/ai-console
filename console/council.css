@@ -32,9 +32,29 @@
   -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
 }
 #council .rt-head-sub{color:var(--rt-tx3);font-size:13px;letter-spacing:.04em;margin-left:4px}
+/* 圆桌是暗面板：里面所有按钮统一走"玻璃 + 金边"这一套，避免白底按钮突兀 */
+#council .btn{
+  background:var(--rt-glass);border:1px solid var(--rt-line);color:var(--rt-tx2);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
+}
+#council .btn:hover{
+  background:rgba(201,168,106,.12);border-color:var(--rt-gold-dim);color:var(--rt-gold-2);
+  box-shadow:0 8px 18px -10px rgba(0,0,0,.9);
+}
+#council .btn.primary{
+  background:linear-gradient(180deg,#e8d3a0,#b8945a);border-color:rgba(240,220,174,.7);
+  color:#241a08;font-weight:700;
+  box-shadow:0 12px 26px -12px rgba(201,168,106,.8),inset 0 1px 0 rgba(255,255,255,.55);
+}
+#council .btn.primary:hover{
+  background:linear-gradient(180deg,#f2debc,#c9a86a);color:#241a08;
+  box-shadow:0 16px 30px -12px rgba(201,168,106,.95),inset 0 1px 0 rgba(255,255,255,.65);
+}
+#council .btn.danger{background:rgba(224,92,92,.12);border:1px solid rgba(224,92,92,.34);color:#f0a1a1}
+#council .btn.danger:hover{background:rgba(224,92,92,.22);color:#ffc9c9}
+
 #council .modal-head .btn.small{
   background:var(--rt-glass);border:1px solid var(--rt-line);color:var(--rt-tx2);
-  border-radius:8px;padding:6px 14px;transition:.18s;
 }
 #council .modal-head .btn.small:hover{border-color:var(--rt-gold-dim);color:var(--rt-gold-2);background:rgba(201,168,106,.10)}
 
@@ -360,7 +380,7 @@
   background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(0,0,0,.20));
   display:flex;align-items:center;gap:10px;
 }
-#council .rt-foot .btn.small{background:var(--rt-glass);border:1px solid var(--rt-line);color:var(--rt-tx2);border-radius:9px;padding:8px 16px}
+#council .rt-foot .btn.small{background:var(--rt-glass);border:1px solid var(--rt-line);color:var(--rt-tx2)}
 #council .rt-foot .btn.small:hover{border-color:var(--rt-gold-dim);color:var(--rt-gold-2);background:rgba(201,168,106,.10)}
 #council .rt-foot .btn.primary.small{
   background:linear-gradient(180deg,#e8d3a0,#b8945a);border:1px solid rgba(240,220,174,.7);
@@ -369,7 +389,7 @@
 }
 #council .rt-foot .btn.primary.small:hover{background:linear-gradient(180deg,#f2debc,#c9a86a);
   box-shadow:0 16px 30px -12px rgba(201,168,106,.95),inset 0 1px 0 rgba(255,255,255,.65)}
-#council .btn.danger{background:rgba(224,92,92,.12);border:1px solid rgba(224,92,92,.34);color:#f0a1a1;border-radius:9px}
+#council .btn.danger{background:rgba(224,92,92,.12);border:1px solid rgba(224,92,92,.34);color:#f0a1a1}
 #council .btn.danger:hover{background:rgba(224,92,92,.22);color:#ffc9c9}
 #council .rt-loading{color:var(--rt-tx3);padding:40px;text-align:center}
 #council .rt-loading.bad{color:#f0a1a1}
