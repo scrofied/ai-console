@@ -263,3 +263,74 @@ Requires [Bun](https://bun.sh) ≥ 1.3. See **Quick start** above. MIT licensed.
 ## License
 
 [MIT](LICENSE) © 2026 scrofied
+
+---
+
+## 更新日志
+
+### v1.2 · 圆桌参谋团 / 流程模板 / 多模态输入 / 会话续接
+
+**1. 参谋团（圆桌）**
+
+开会前先由几位"参谋"各出一份主意，再交给指挥官揉成一条主线。
+
+- 顶栏「◎ 参谋团」打开圆桌：每人一张脸、一块名牌，按桌沿环形排布，远近有遮挡和明暗
+- **真 3D 底图**：`console/assets/table-sci-fi.png`（AI 生成）当舞台，人物按图里桌沿的椭圆摆位
+- 每席可配置：席位名、用哪个 AI、人格文件（`console/council/*.md`）、启用开关、真人头像
+- 没上传照片的席位用程序化生成的头像（`console/portrait.js`，按席位 id 稳定生成）
+- 会议预算独立于任务预算，可在圆桌上设置；保存后立即生效，不用重启
+
+![圆桌](docs/screenshots/05-council.png)
+
+**2. 流程模板（固定分工）**
+
+已经跑通的人工分工可以固化成模板，一键开工，不经过拆单。
+
+- 每步固定一个执行者、固定依赖关系；模板里的依赖写 key，派单时自动映射成卡号
+- 开工时填的目标会追加到每一步的「做什么」后面，同一套流程可反复用于不同题材
+- 内置「短视频流水线」（找对标 → 转逐字稿 → 仿写文案 → 生成视频）与「资料→网页」
+
+![流程模板](docs/screenshots/06-flows.png)
+
+**3. 多模态输入**
+
+对话输入框和新任务输入框都能直接塞文件。
+
+- 粘贴（截图 / 复制文件）、拖拽、📎 选择文件三种方式
+- 图片显示真实缩略图，可逐个移除；上限 10 个、单个 25MB
+- 上传后按对话分组落盘（`intake/attachments/Jxx/`），正文自动追加附件清单（含绝对路径）
+- 图片还会以 `-i` / `--attachment` 传给支持的 CLI，让模型真的"看见"图
+
+![多模态输入](docs/screenshots/07-attach.png)
+
+**4. 会话续接（上下文不断）**
+
+这是最影响体感的一项：原来每次调用 CLI 都是全新会话，同类任务每次都要重新交代。
+
+- 按「工具 + 作用域」维护固定 session id，之后每次调用都 resume 它
+- 作用域：`default`（普通任务）/ `flow:<流程>/<步骤>`（流程某一步，跨任务累积）/
+  `review`（验收单独一条）/ `plan`（拆单）/ `council:<席位>`（每席各一条）
+- 四个 CLI 的续接方式不同：Qoder / WorkBuddy 用 `--session-id` + `--resume`；
+  Codex / Trae 没有该参数，从 `--json` 流的 `thread.started` 抓 `thread_id`，再用 `exec resume`
+- `GET /api/sessions` 查看、`POST /api/sessions/reset` 重置（跑歪了就开新局）
+
+**5. 指挥官自己也干活**
+
+拆单不再只是"把活分出去"。
+
+- 方案里 `worker` 可以直接填 `self`，`mode` 标 `self` / `parallel` / `serial`
+- 一个人能交付的就自己干；互不依赖的并行；必须按顺序的靠 deps 接力
+- 指挥官干的卡仍然由**别的 AI** 验收（不自己验自己）
+
+**6. 其它**
+
+- 新增执行体 `console/runners-extra.ts`：Trae CLI、ACP HTTP 网关（WorkBuddy AI 国际版）、
+  ACP stdio（Qoder 国际版）
+- `config/flows.example.json` / `config/council.example.json` 供参考
+- 修复：WorkBuddy 的 Key 兜底改用"写临时文件再读"，绕开受限环境下的管道限制
+
+### v1.1
+
+- 接入 WorkBuddy / WorkBuddy AI / Qoder / Qoder 国际版 / Trae 作为子 agent 执行体
+- 模型可选：手选、按优先级自动挑、优先免费
+

@@ -1,0 +1,34 @@
+{
+  "councilDefault": true,
+  "councilBudgetPerDay": 24,
+  "seats": [
+    {
+      "id": "munger",
+      "name": "芒格参谋",
+      "skill": "console/council/munger.md",
+      "tool": "codex",
+      "enabled": true
+    },
+    {
+      "id": "musk",
+      "name": "马斯克参谋",
+      "skill": "console/council/musk.md",
+      "tool": "workbuddy",
+      "enabled": true
+    },
+    {
+      "id": "bezos",
+      "name": "贝索斯参谋",
+      "skill": "console/council/bezos.md",
+      "tool": "auto",
+      "enabled": true
+    },
+    {
+      "id": "jobs",
+      "name": "乔布斯参谋",
+      "skill": "console/council/jobs.md",
+      "tool": "auto",
+      "enabled": true
+    }
+  ]
+}

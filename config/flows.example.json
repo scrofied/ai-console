@@ -1,0 +1,106 @@
+{
+  "_note": "流程模板：固定步骤 + 固定执行者。开工时直接用模板派卡，不经过指挥官拆单。steps 的 deps 填前面步骤的 key。会显示在「流程」面板里，可编辑。",
+  "flows": [
+    {
+      "id": "video-pipeline",
+      "name": "短视频流水线",
+      "desc": "找对标 → 转逐字稿 → 仿写文案 → 生成视频。四步接力，每步固定给一个 AI。",
+      "steps": [
+        {
+          "key": "benchmark",
+          "title": "找对标",
+          "worker": "workbuddy",
+          "mode": "serial",
+          "deps": [],
+          "do": "围绕目标题材找 3-5 个同赛道对标爆款，逐个记录：标题、开场钩子、结构骨架、数据表现（赞/藏/评/时长，能查到的写上，查不到写未核实）。产出 benchmark.md。不要凭印象编数据，每条都要写清来源或标「未核实」。",
+          "reference": "用户之前用 TikHub 抓同题爆款的做法：先按题材搜，再按互动率排序挑前几名。",
+          "avoid": "不要写文案、不要写逐字稿、不要做视频；不要给没有来源的数据。",
+          "done_when": "- [ ] benchmark.md 里有 3-5 个对标，每个都有标题和开场钩子\n- [ ] 每个对标的结构骨架用 3-6 句话讲清\n- [ ] 数据逐条标了来源或「未核实」"
+        },
+        {
+          "key": "transcript",
+          "title": "转逐字稿",
+          "worker": "traework",
+          "mode": "serial",
+          "deps": [
+            "benchmark"
+          ],
+          "do": "读取上一步 benchmark.md 里挑出的对标，选出最值得仿的一条，把它的文案结构逐拍拆成逐字稿骨架（每拍一句话，标明这一拍的功能：钩子/铺垫/展开/收尾）。产出 transcript.md。如果只有结构没有原文，就按结构复述，不要伪造原句。",
+          "reference": "benchmark.md",
+          "avoid": "不要写成品文案，这一步只出结构骨架；不要伪造原文。",
+          "done_when": "- [ ] transcript.md 里逐拍列出结构，每拍标明功能\n- [ ] 明确写出选了哪一条对标、为什么选它\n- [ ] 没有伪造原文句子"
+        },
+        {
+          "key": "copy",
+          "title": "仿写文案",
+          "worker": "workbuddy",
+          "mode": "serial",
+          "deps": [
+            "transcript"
+          ],
+          "do": "按上一步 transcript.md 的逐拍结构，替换成用户自己的题材，写出可直接口播的逐字稿。要求：开场 20 秒内点明主题、干货密集不凑字数、口语化、全角标点、正文不用粗体。产出 copy.md（逐字稿）+ 纯口播.txt。",
+          "reference": "transcript.md 的结构骨架",
+          "avoid": "不要用「赋能/闭环/底层逻辑/交付/颗粒度」这类词；不要写超过 3000 字凑时长；不要加粗体。",
+          "done_when": "- [ ] copy.md 和 纯口播.txt 都产出，且正文内容一致\n- [ ] 开场 20 秒内点明主题\n- [ ] 违禁词 0 命中（赋能/闭环/底层逻辑/交付/颗粒度）\n- [ ] 正文没有粗体标记"
+        },
+        {
+          "key": "video",
+          "title": "生成视频",
+          "worker": "qoder",
+          "mode": "serial",
+          "deps": [
+            "copy"
+          ],
+          "do": "读取上一步的 纯口播.txt，按口播内容拆成分镜（每镜标：画面描述、对应文案句子、时长估计），并生成一份可直接执行的剪辑清单。如果本机有可用的剪辑/渲染命令，就跑一次试试；跑不了就在 note.md 里写清缺什么。产出 storyboard.md + 剪辑清单。",
+          "reference": "纯口播.txt",
+          "avoid": "不要改文案内容；不要伪造已经渲染成功的成片；做不到就如实写缺口。",
+          "done_when": "- [ ] storyboard.md 里每个分镜标了画面描述和对应文案\n- [ ] 剪辑清单可以照着执行\n- [ ] 没有声称生成了实际不存在的成片"
+        }
+      ]
+    },
+    {
+      "id": "page-from-notes",
+      "name": "资料→网页",
+      "desc": "整理资料 → 出结构 → 写页面 → 自检。适合把一堆资料变成一张能看的页面。",
+      "steps": [
+        {
+          "key": "digest",
+          "title": "整理资料",
+          "worker": "workbuddy",
+          "mode": "serial",
+          "deps": [],
+          "do": "把用户提供的资料读一遍，提炼成结构化要点：主题、3-5 个关键结论、可引用的数据（带出处）、还缺什么信息。产出 digest.md。",
+          "reference": "",
+          "avoid": "不要开始写页面；不要编造资料里没有的数据。",
+          "done_when": "- [ ] digest.md 有主题、关键结论、数据（带出处）、缺项清单\n- [ ] 没有编造资料外的数据"
+        },
+        {
+          "key": "outline",
+          "title": "出页面结构",
+          "worker": "codex",
+          "mode": "serial",
+          "deps": [
+            "digest"
+          ],
+          "do": "按 digest.md 出一张页面的信息结构：分几个区块、每个区块放什么、阅读顺序。产出 outline.md。",
+          "reference": "digest.md",
+          "avoid": "不要写 HTML/CSS，这一步只出结构。",
+          "done_when": "- [ ] outline.md 列出区块和每块内容\n- [ ] 说明了阅读顺序"
+        },
+        {
+          "key": "page",
+          "title": "写页面",
+          "worker": "qoder",
+          "mode": "serial",
+          "deps": [
+            "outline"
+          ],
+          "do": "按 outline.md 写一个单文件 index.html（HTML+CSS 内联，不引外部依赖），内容用 digest.md 里的资料。产出 index.html。",
+          "reference": "outline.md",
+          "avoid": "不要引入外部 CDN 或依赖；不要写多文件工程。",
+          "done_when": "- [ ] index.html 单文件，无外部依赖\n- [ ] 覆盖 outline.md 的全部区块\n- [ ] 内容与 digest.md 一致"
+        }
+      ]
+    }
+  ]
+}

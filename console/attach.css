@@ -1,0 +1,28 @@
+/* 多模态输入：附件条、拖拽高亮、缩略图 */
+
+.att-tray{display:none;flex-wrap:wrap;gap:8px;padding:8px 12px 2px}
+.att-tray.show{display:flex}
+.att{position:relative;display:flex;align-items:center;gap:7px;max-width:210px;
+  border:1px solid var(--line);border-radius:10px;background:var(--panel);padding:5px 8px 5px 6px;
+  box-shadow:var(--sh1);animation:rise .2s var(--ease) both}
+.att.up{opacity:.7;border-style:dashed}
+.att img{width:34px;height:34px;object-fit:cover;border-radius:7px;flex:none;border:1px solid var(--line)}
+.att-ico{width:34px;height:34px;display:grid;place-items:center;border-radius:7px;background:var(--gray-bg);font-size:16px;flex:none}
+.att-name{font-size:12.5px;color:var(--tx2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:130px}
+.att-x{position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;border:1px solid var(--line2);
+  background:#fff;color:var(--tx3);font-size:11px;line-height:1;display:grid;place-items:center;cursor:pointer;
+  box-shadow:var(--sh1);transition:background .15s,color .15s}
+.att-x:hover{background:var(--red);color:#fff;border-color:var(--red)}
+
+/* 拖拽到输入区时的高亮 */
+.composer.drag-over,.welcome-inner.drag-over{outline:2px dashed var(--blue);outline-offset:-6px;background:var(--blue-bg)}
+
+/* 附件按钮（回形针） */
+.attach-btn{border:1px solid var(--line);background:var(--panel);color:var(--tx2);border-radius:9px;
+  width:34px;height:34px;display:grid;place-items:center;font-size:16px;cursor:pointer;flex:none;
+  transition:border-color .15s,background .15s,color .15s}
+.attach-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-bg)}
+
+/* 新任务页的附件条稍微宽一点 */
+.welcome-inner .att-tray{padding:8px 2px 0}
+.composer-row .attach-btn{margin-right:2px}

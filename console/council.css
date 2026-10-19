@@ -1,0 +1,388 @@
+/* ==========================================================================
+   参谋团圆桌 · 3D 会议室皮肤
+   - 舞台开启 perspective，桌子是俯视的圆盘，席位牌从平面上"立起来"
+   - 席位支持真人照片（seat.avatarUrl），没有照片时用人物剪影而不是字母
+   整块皮肤只在 #council 弹窗内生效。
+   ========================================================================== */
+
+#council .council-card{
+  width:min(1220px,96vw);
+  --rt-bg1:#080b11; --rt-bg2:#0f1520;
+  --rt-glass:rgba(255,255,255,.06);
+  --rt-line:rgba(255,255,255,.10);
+  --rt-tx:#eaeef6; --rt-tx2:#98a3b7; --rt-tx3:#6b7688;
+  --rt-gold:#c9a86a; --rt-gold-2:#f0dcae; --rt-gold-dim:rgba(201,168,106,.30);
+  color:var(--rt-tx);
+  background:
+    radial-gradient(1100px 520px at 50% -12%,#1a2438 0%,rgba(26,36,56,0) 62%),
+    linear-gradient(180deg,var(--rt-bg2),var(--rt-bg1));
+  border:1px solid rgba(201,168,106,.22);
+  box-shadow:0 44px 110px -34px rgba(0,0,0,.9),0 0 0 1px rgba(255,255,255,.04) inset;
+  overflow:hidden;
+}
+
+/* 顶栏 */
+#council .modal-head{
+  background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,0));
+  border-bottom:1px solid rgba(201,168,106,.20);padding:16px 22px;
+}
+#council .modal-head b{
+  font-size:19px;letter-spacing:.14em;font-weight:600;
+  background:linear-gradient(92deg,#f6eacd,#c9a86a 55%,#f6eacd);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+}
+#council .rt-head-sub{color:var(--rt-tx3);font-size:13px;letter-spacing:.04em;margin-left:4px}
+#council .modal-head .btn.small{
+  background:var(--rt-glass);border:1px solid var(--rt-line);color:var(--rt-tx2);
+  border-radius:8px;padding:6px 14px;transition:.18s;
+}
+#council .modal-head .btn.small:hover{border-color:var(--rt-gold-dim);color:var(--rt-gold-2);background:rgba(201,168,106,.10)}
+
+#council .council-body{padding:20px 22px 0;background:transparent}
+
+/* ---------------- 3D 舞台 ---------------- */
+#council .rt-stage{
+  height:540px;border-radius:18px;overflow:hidden;position:relative;
+  perspective:1500px;perspective-origin:50% 30%;
+  background:
+    radial-gradient(680px 300px at 50% 18%,rgba(201,168,106,.13) 0%,rgba(201,168,106,0) 66%),
+    radial-gradient(1100px 760px at 50% 120%,#141c2b 0%,#0a0e16 52%,#070a0f 100%);
+  border:1px solid var(--rt-line);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06),inset 0 -60px 90px -50px rgba(0,0,0,.95);
+}
+/* 地面：桌子下方的一圈柔和光池 */
+#council .rt-floor{
+  position:absolute;left:50%;top:62%;width:760px;height:420px;transform:translate(-50%,-50%);
+  background:radial-gradient(ellipse at 50% 50%,rgba(201,168,106,.11) 0%,rgba(201,168,106,0) 62%);
+  pointer-events:none;z-index:1;
+}
+
+/* 3D 平面容器：只装桌面。z-index 是关键：
+   远侧的人(z=3) 在桌子后面，近侧的人(z=9) 压在桌子前面 —— 这样才有"坐在桌边"的空间关系 */
+#council .rt-scene{
+  position:absolute;inset:0;
+  transform-style:preserve-3d;
+  transform:rotateX(58deg) translateY(46px);
+  pointer-events:none;z-index:5;
+}
+
+/* 桌面：一个圆盘（被 perspective 压成椭圆就是真实的俯视效果） */
+#council .rt-table{
+  position:absolute;left:50%;top:59%;width:470px;height:470px;margin:0;
+  border-radius:50%;
+  background:
+    radial-gradient(circle at 44% 30%,rgba(255,255,255,.22) 0%,rgba(255,255,255,.06) 40%,rgba(0,0,0,.30) 86%),
+    linear-gradient(160deg,#28323f,#131a24);
+  box-shadow:
+    0 0 0 1px rgba(201,168,106,.40) inset,
+    0 0 0 10px rgba(255,255,255,.035),
+    0 0 0 11px rgba(201,168,106,.24),
+    0 0 0 28px rgba(201,168,106,.05),
+    0 40px 70px -20px rgba(0,0,0,.95);
+  /* 用 transform 居中：负 margin 会被 ui.css 里的旧规则/百分比解析影响，不可靠 */
+  transform:translate(-50%,-50%) translateZ(0);
+}
+/* ===== 底图模式：AI 生成的未来科技感圆桌 =====
+   舞台直接用 Qoder 生成的 1792×1024 图片，人物按图里桌子的真实椭圆摆在桌沿，
+   界面元素（名牌、HUD、选中态）叠在图上 —— 这就是"在图上做二次开发"。 */
+#council .rt-stage.has-bg{
+  aspect-ratio:1792 / 1024;height:auto;min-height:0;
+  background:var(--bg) center/cover no-repeat,#070a0f;
+  perspective:none;
+  border-color:rgba(90,200,255,.20);
+}
+#council .rt-stage.has-bg .rt-scene,
+#council .rt-stage.has-bg .rt-floor{display:none}
+/* 压暗四周，保证名牌和 HUD 可读 */
+#council .rt-stage.has-bg::after{
+  content:"";position:absolute;inset:0;pointer-events:none;z-index:1;
+  background:
+    radial-gradient(ellipse 62% 56% at 50% 54%,rgba(4,8,14,0) 45%,rgba(3,6,11,.62) 100%),
+    linear-gradient(180deg,rgba(3,6,11,.45),rgba(3,6,11,0) 32%,rgba(3,6,11,0) 70%,rgba(3,6,11,.5));
+}
+/* 桌面光环保：贴着图里桌沿的一圈青色辉光，选中席位时脉冲 */
+#council .rt-rim{
+  position:absolute;left:49.2%;top:57.2%;width:76.2%;height:57.6%;
+  transform:translate(-50%,-50%);border-radius:50%;
+  border:1px solid rgba(120,225,255,.22);
+  box-shadow:0 0 28px -4px rgba(80,200,255,.25),0 0 70px -12px rgba(60,170,255,.16) inset;
+  pointer-events:none;z-index:2;
+}
+#council .rt-rim-pulse{
+  position:absolute;inset:-6px;border-radius:50%;
+  border:1px solid rgba(120,220,255,.5);
+  animation:rtRim 3.2s ease-out infinite;
+}
+@keyframes rtRim{
+  0%{transform:scale(.965);opacity:.75}
+  70%{transform:scale(1.03);opacity:0}
+  100%{transform:scale(1.03);opacity:0}
+}
+
+/* 桌面高光：柔和的一层，不要做成"一滩水" */
+#council .rt-table-sheen{
+  position:absolute;left:10%;top:6%;right:10%;height:52%;border-radius:50%;
+  background:radial-gradient(ellipse at 50% 20%,rgba(255,255,255,.10),rgba(255,255,255,0) 68%);
+  filter:blur(10px);
+}
+/* 桌子厚度：只在盘下方露一圈暗边，不做整块暗盘（会变成桌面中间一个黑洞） */
+#council .rt-table::before{
+  content:"";position:absolute;inset:-2px;border-radius:50%;
+  transform:translateZ(-14px);
+  box-shadow:0 14px 0 -2px rgba(4,6,10,.85),0 0 0 1px rgba(201,168,106,.10);
+}
+
+/* 席位 = 一个坐在桌边的人：头像 + 名牌，按景深分前后（远处被桌子挡住） */
+#council .rt-seat{
+  position:absolute;width:132px;
+  transform:translate(-50%,-50%) scale(var(--sc,1));
+  display:flex;flex-direction:column;align-items:center;gap:0;
+  border:0;background:none;box-shadow:none;padding:0;cursor:pointer;color:var(--rt-tx);
+  z-index:var(--z,3);opacity:var(--dim,1);
+  transition:transform .24s cubic-bezier(.2,.8,.2,1),opacity .2s,filter .2s;
+  filter:brightness(calc(.72 + var(--dim,1) * .28));
+}
+#council .rt-seat:hover{
+  transform:translate(-50%,-50%) scale(calc(var(--sc,1) * 1.08)) translateY(-6px);
+  opacity:1;filter:brightness(1);z-index:12;
+}
+#council .rt-seat.sel{
+  opacity:1;filter:brightness(1);z-index:12;
+}
+
+/* 头像外圈：金属台座 */
+#council .rt-portrait{
+  position:relative;display:grid;place-items:center;
+  padding:4px;border-radius:50%;
+  background:linear-gradient(160deg,rgba(255,255,255,.22),rgba(255,255,255,.03) 45%,rgba(0,0,0,.35));
+  box-shadow:
+    0 20px 34px -16px rgba(0,0,0,.95),
+    0 0 0 1px rgba(255,255,255,.10) inset;
+}
+#council .rt-seat.sel .rt-portrait{
+  background:linear-gradient(160deg,rgba(240,220,174,.85),rgba(201,168,106,.35) 46%,rgba(0,0,0,.4));
+  box-shadow:0 0 0 1px rgba(240,220,174,.55),0 0 34px -6px rgba(201,168,106,.75),0 22px 36px -16px rgba(0,0,0,1);
+}
+/* 发言/选中时的呼吸环（参考 Clubhouse 的 speaking ring） */
+#council .rt-seat.sel .rt-portrait::after{
+  content:"";position:absolute;inset:-6px;border-radius:50%;
+  border:1px solid rgba(240,220,174,.55);
+  animation:rtSpeak 2.4s ease-out infinite;
+}
+@keyframes rtSpeak{
+  0%{transform:scale(.94);opacity:.9}
+  70%{transform:scale(1.10);opacity:0}
+  100%{transform:scale(1.10);opacity:0}
+}
+
+/* 头像本体 */
+#council .rt-ava{
+  width:86px;height:86px;border-radius:50%;overflow:hidden;position:relative;flex:none;
+  display:grid;place-items:center;
+  background:linear-gradient(160deg,#3a4658,#141a24);
+  box-shadow:0 0 0 2px rgba(10,14,20,.9),0 0 0 3px rgba(255,255,255,.06) inset;
+}
+#council .rt-ava.has-photo,#council .rt-ava.has-face{background:linear-gradient(160deg,#3a4658,#141a24)}
+#council .rt-ava img{width:100%;height:100%;object-fit:cover;display:block}
+/* 生成的人像放大取景，做成大头贴：脸占满圆框、肩膀露一点 */
+#council .rt-ava.has-face img{transform:scale(1.22) translateY(-4%)}
+
+/* 主持标记 */
+#council .rt-crown{
+  position:absolute;bottom:-2px;right:-2px;
+  font-size:9.5px;line-height:1;padding:3px 5px;border-radius:6px;
+  background:linear-gradient(180deg,#f0dcae,#c9a86a);color:#241a08;font-weight:700;
+  box-shadow:0 2px 6px rgba(0,0,0,.6);letter-spacing:.02em;
+}
+
+/* 桌面名牌：像会议桌上的铜牌 */
+#council .rt-plate{
+  position:relative;
+  margin-top:-9px;padding:4px 11px 5px;border-radius:8px;text-align:center;max-width:128px;
+  background:linear-gradient(180deg,rgba(26,34,46,.97),rgba(9,13,19,.98));
+  border:1px solid rgba(201,168,106,.34);
+  box-shadow:0 10px 20px -10px rgba(0,0,0,1),0 1px 0 rgba(255,255,255,.07) inset;
+  display:flex;flex-direction:column;gap:1px;z-index:2;
+}
+/* 名牌下的一小片地面阴影：让人"落"在桌边而不是浮着 */
+#council .rt-plate::after{
+  content:"";position:absolute;left:50%;bottom:-15px;width:112%;height:15px;
+  transform:translateX(-50%);
+  background:radial-gradient(ellipse at 50% 0%,rgba(0,0,0,.62),rgba(0,0,0,0) 72%);
+  filter:blur(2px);pointer-events:none;
+}
+#council .rt-seat.sel .rt-plate{border-color:rgba(240,220,174,.75);box-shadow:0 0 18px -6px rgba(201,168,106,.7),0 10px 20px -10px rgba(0,0,0,1)}
+#council .rt-plate b{
+  font-size:12.5px;font-weight:600;letter-spacing:.02em;color:#f4f7fb;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:108px;
+}
+#council .rt-plate i{
+  font-style:normal;font-size:10.5px;letter-spacing:.03em;color:#8c97aa;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:108px;
+}
+#council .rt-seat.off{opacity:.38;filter:grayscale(.7)}
+#council .rt-seat.bad .rt-plate{border-color:rgba(224,165,60,.5)}
+
+/* 头像：真人照片或程序化生成的大头贴 */
+#council .rt-ava{
+  width:72px;height:72px;border-radius:50%;overflow:hidden;position:relative;flex:none;
+  display:grid;place-items:center;
+  background:
+    radial-gradient(circle at 50% 118%,rgba(255,255,255,.16),rgba(255,255,255,0) 62%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cg fill='rgba(255,255,255,.86)'%3E%3Ccircle cx='32' cy='22.5' r='10.5'/%3E%3Cpath d='M32 36c-11.6 0-20 7.4-22 18.6h44C52 43.4 43.6 36 32 36z'/%3E%3C/g%3E%3C/svg%3E") center 58%/66% no-repeat,
+    linear-gradient(160deg,#3a4658,#141a24);
+  box-shadow:
+    0 12px 24px -10px rgba(0,0,0,.95),
+    0 0 0 1px rgba(255,255,255,.22),
+    0 0 0 4px rgba(255,255,255,.06),
+    inset 0 1px 0 rgba(255,255,255,.35);
+}
+/* 有真人照片 / 生成脸时，去掉剪影底 */
+#council .rt-ava.has-photo,#council .rt-ava.has-face{background:linear-gradient(160deg,#3a4658,#141a24)}
+#council .rt-ava img{width:100%;height:100%;object-fit:cover;display:block}
+/* 生成的人像放大取景，做成大头贴：脸占满圆框、肩膀露一点 */
+#council .rt-ava.has-face img{transform:scale(1.22) translateY(-4%)}
+#council .rt-seat.sel .rt-ava{
+  box-shadow:
+    0 12px 26px -8px rgba(0,0,0,.95),
+    0 0 0 1px rgba(240,220,174,.9),
+    0 0 0 5px rgba(201,168,106,.24),
+    inset 0 1px 0 rgba(255,255,255,.4);
+}
+
+/* 每个 AI 的头像底色 */
+#council .rt-ava.codex{background-color:#0f1319;background-image:
+  radial-gradient(circle at 50% 118%,rgba(255,255,255,.16),rgba(255,255,255,0) 62%),
+  url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cg fill='rgba(255,255,255,.86)'%3E%3Ccircle cx='32' cy='22.5' r='10.5'/%3E%3Cpath d='M32 36c-11.6 0-20 7.4-22 18.6h44C52 43.4 43.6 36 32 36z'/%3E%3C/g%3E%3C/svg%3E"),
+  linear-gradient(160deg,#39424f,#0f1319);
+  background-size:auto,66%,100%;background-position:center,center 58%,center;background-repeat:no-repeat}
+#council .rt-ava.workbuddy{background-image:
+  radial-gradient(circle at 50% 118%,rgba(255,255,255,.18),rgba(255,255,255,0) 62%),
+  url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cg fill='rgba(255,255,255,.88)'%3E%3Ccircle cx='32' cy='22.5' r='10.5'/%3E%3Cpath d='M32 36c-11.6 0-20 7.4-22 18.6h44C52 43.4 43.6 36 32 36z'/%3E%3C/g%3E%3C/svg%3E"),
+  linear-gradient(160deg,#2fd8c0,#0a6f66);
+  background-size:auto,66%,100%;background-position:center,center 58%,center;background-repeat:no-repeat}
+#council .rt-ava.workbuddyai{background-image:
+  radial-gradient(circle at 50% 118%,rgba(255,255,255,.18),rgba(255,255,255,0) 62%),
+  url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cg fill='rgba(255,255,255,.88)'%3E%3Ccircle cx='32' cy='22.5' r='10.5'/%3E%3Cpath d='M32 36c-11.6 0-20 7.4-22 18.6h44C52 43.4 43.6 36 32 36z'/%3E%3C/g%3E%3C/svg%3E"),
+  linear-gradient(160deg,#6aa8ff,#1d4fd0);
+  background-size:auto,66%,100%;background-position:center,center 58%,center;background-repeat:no-repeat}
+#council .rt-ava.qoder{background-image:
+  radial-gradient(circle at 50% 118%,rgba(255,255,255,.18),rgba(255,255,255,0) 62%),
+  url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cg fill='rgba(255,255,255,.88)'%3E%3Ccircle cx='32' cy='22.5' r='10.5'/%3E%3Cpath d='M32 36c-11.6 0-20 7.4-22 18.6h44C52 43.4 43.6 36 32 36z'/%3E%3C/g%3E%3C/svg%3E"),
+  linear-gradient(160deg,#a78bfa,#5b21b6);
+  background-size:auto,66%,100%;background-position:center,center 58%,center;background-repeat:no-repeat}
+#council .rt-ava.qoder-intl{background-image:
+  radial-gradient(circle at 50% 118%,rgba(255,255,255,.18),rgba(255,255,255,0) 62%),
+  url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cg fill='rgba(255,255,255,.88)'%3E%3Ccircle cx='32' cy='22.5' r='10.5'/%3E%3Cpath d='M32 36c-11.6 0-20 7.4-22 18.6h44C52 43.4 43.6 36 32 36z'/%3E%3C/g%3E%3C/svg%3E"),
+  linear-gradient(160deg,#c084fc,#6b21a8);
+  background-size:auto,66%,100%;background-position:center,center 58%,center;background-repeat:no-repeat}
+#council .rt-ava.traework{background-image:
+  radial-gradient(circle at 50% 118%,rgba(255,255,255,.18),rgba(255,255,255,0) 62%),
+  url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cg fill='rgba(255,255,255,.88)'%3E%3Ccircle cx='32' cy='22.5' r='10.5'/%3E%3Cpath d='M32 36c-11.6 0-20 7.4-22 18.6h44C52 43.4 43.6 36 32 36z'/%3E%3C/g%3E%3C/svg%3E"),
+  linear-gradient(160deg,#fb923c,#a83c07);
+  background-size:auto,66%,100%;background-position:center,center 58%,center;background-repeat:no-repeat}
+#council .rt-ava.auto{background-image:
+  radial-gradient(circle at 50% 118%,rgba(255,255,255,.16),rgba(255,255,255,0) 62%),
+  url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cg fill='rgba(255,255,255,.86)'%3E%3Ccircle cx='32' cy='22.5' r='10.5'/%3E%3Cpath d='M32 36c-11.6 0-20 7.4-22 18.6h44C52 43.4 43.6 36 32 36z'/%3E%3C/g%3E%3C/svg%3E"),
+  linear-gradient(160deg,#5a6577,#2a3240);
+  background-size:auto,66%,100%;background-position:center,center 58%,center;background-repeat:no-repeat}
+
+#council .rt-name{font-size:13.5px;color:#f3f6fb;letter-spacing:.02em;text-shadow:0 1px 2px rgba(0,0,0,.6)}
+#council .rt-tool{font-size:11px;color:var(--rt-tx3);letter-spacing:.04em}
+#council .rt-empty{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);color:var(--rt-tx3);font-size:14px}
+
+/* 会议信息 HUD：移到左上角，桌面中间留空（真实圆桌中间本来就没有东西，
+   而且这样不会挡住桌边的任何一位） */
+#council .rt-hud{
+  position:absolute;left:18px;top:16px;width:228px;z-index:20;
+  padding:13px 14px 12px;border-radius:13px;text-align:left;
+  background:linear-gradient(180deg,rgba(20,27,38,.80),rgba(8,11,17,.86));
+  border:1px solid rgba(201,168,106,.24);
+  box-shadow:0 18px 40px -20px rgba(0,0,0,.95),0 0 0 1px rgba(255,255,255,.04) inset;
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+}
+#council .rt-hud-title{
+  font-size:15px;font-weight:600;letter-spacing:.20em;text-indent:.20em;color:transparent;
+  background:linear-gradient(180deg,#f8efd7,#c9a86a 68%,#a8894f);
+  -webkit-background-clip:text;background-clip:text;
+}
+#council .rt-hud-sub{color:var(--rt-tx3);font-size:11.5px;letter-spacing:.04em;margin-top:3px}
+
+/* 开关 */
+#council .rt-switch{margin-top:13px;gap:8px;padding:0;background:none;border:0;box-shadow:none;color:var(--rt-tx2);font-size:12.5px}
+#council .rt-switch input{position:absolute;opacity:0;width:0;height:0}
+#council .rt-switch .sw{width:34px;height:19px;border-radius:999px;flex:none;position:relative;
+  background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.14);transition:.22s}
+#council .rt-switch .sw::after{content:"";position:absolute;top:2px;left:2px;width:13px;height:13px;border-radius:50%;
+  background:#8b95a8;transition:.22s cubic-bezier(.2,.8,.2,1)}
+#council .rt-switch input:checked + .sw{background:linear-gradient(90deg,rgba(201,168,106,.45),rgba(240,220,174,.62));border-color:rgba(240,220,174,.55)}
+#council .rt-switch input:checked + .sw::after{left:17px;background:linear-gradient(180deg,#fff8e6,#e3c88b);box-shadow:0 0 10px rgba(240,220,174,.7)}
+#council .rt-budget{color:var(--rt-tx3);font-size:12.5px;margin-top:9px;gap:5px}
+#council .rt-budget input{width:48px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.13);
+  color:var(--rt-gold-2);font-weight:600;border-radius:7px;padding:2px 4px}
+#council .rt-budget input:focus{outline:none;border-color:var(--rt-gold-dim);box-shadow:0 0 0 3px rgba(201,168,106,.18)}
+
+/* ---------------- 右侧编辑面板 ---------------- */
+#council .rt-side{flex:0 0 376px;min-width:330px;max-height:540px;padding-right:4px}
+#council .rt-editor{
+  background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.015));
+  border:1px solid var(--rt-line);border-radius:16px;padding:16px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.07);color:var(--rt-tx);
+}
+#council .rt-editor-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+#council .rt-editor-head b{color:#f3f6fb;font-size:17px}
+#council .rt-editor-head .rt-ava{width:40px;height:40px}
+#council .rt-editor-empty{color:var(--rt-tx3)}
+#council .rt-field{color:var(--rt-tx3);font-size:12.5px;letter-spacing:.04em;margin-bottom:10px}
+#council .rt-field input,#council .rt-field select{
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.13);color:var(--rt-tx);border-radius:9px;
+}
+#council .rt-field input:focus,#council .rt-field select:focus{
+  border-color:rgba(240,220,174,.55);box-shadow:0 0 0 3px rgba(201,168,106,.16);background:rgba(255,255,255,.075)}
+#council .rt-field select option{background:#141b28;color:var(--rt-tx)}
+#council .rt-check{color:var(--rt-tx2);font-size:14px}
+#council .rt-skill-box{border-top:1px solid rgba(255,255,255,.09);padding-top:10px}
+#council .rt-skill-head{color:var(--rt-tx2);font-size:14px}
+#council .rt-skill-file{color:var(--rt-tx3);font-family:Consolas,monospace;font-size:12px}
+#council .rt-skill-text{background:rgba(0,0,0,.34);border:1px solid rgba(255,255,255,.10);color:#dbe3f0;border-radius:10px;
+  font:400 14px/1.6 Consolas,"Microsoft YaHei UI",monospace}
+#council .rt-skill-text:focus{border-color:rgba(240,220,174,.5);box-shadow:0 0 0 3px rgba(201,168,106,.14);background:rgba(0,0,0,.46)}
+#council .rt-hint{color:var(--rt-tx3)}
+
+/* 头像编辑行 */
+#council .rt-photo-row{display:flex;align-items:center;gap:10px;margin:2px 0 12px}
+#council .rt-photo-row .rt-ava{width:46px;height:46px}
+#council .rt-photo-tip{font-size:12px;color:var(--rt-tx3);line-height:1.5}
+
+/* ---------------- 底部 ---------------- */
+#council .rt-foot{
+  border-top:1px solid rgba(201,168,106,.18);padding:14px 22px 16px;
+  background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(0,0,0,.20));
+  display:flex;align-items:center;gap:10px;
+}
+#council .rt-foot .btn.small{background:var(--rt-glass);border:1px solid var(--rt-line);color:var(--rt-tx2);border-radius:9px;padding:8px 16px}
+#council .rt-foot .btn.small:hover{border-color:var(--rt-gold-dim);color:var(--rt-gold-2);background:rgba(201,168,106,.10)}
+#council .rt-foot .btn.primary.small{
+  background:linear-gradient(180deg,#e8d3a0,#b8945a);border:1px solid rgba(240,220,174,.7);
+  color:#241a08;font-weight:700;letter-spacing:.06em;
+  box-shadow:0 12px 26px -12px rgba(201,168,106,.8),inset 0 1px 0 rgba(255,255,255,.55);
+}
+#council .rt-foot .btn.primary.small:hover{background:linear-gradient(180deg,#f2debc,#c9a86a);
+  box-shadow:0 16px 30px -12px rgba(201,168,106,.95),inset 0 1px 0 rgba(255,255,255,.65)}
+#council .btn.danger{background:rgba(224,92,92,.12);border:1px solid rgba(224,92,92,.34);color:#f0a1a1;border-radius:9px}
+#council .btn.danger:hover{background:rgba(224,92,92,.22);color:#ffc9c9}
+#council .rt-loading{color:var(--rt-tx3);padding:40px;text-align:center}
+#council .rt-loading.bad{color:#f0a1a1}
+
+#council .council-body::-webkit-scrollbar-thumb,#council .rt-side::-webkit-scrollbar-thumb{
+  background:rgba(255,255,255,.14);background-clip:content-box;border:3px solid transparent;border-radius:99px}
+#council .council-body,#council .rt-side{scrollbar-color:rgba(255,255,255,.14) transparent}
+
+@media (max-width:1040px){
+  #council .rt-stage{min-width:0;flex-basis:100%;height:470px;perspective:1100px}
+  #council .rt-side{flex-basis:100%;min-width:0;max-height:none}
+  #council .rt-table{width:340px;height:340px;margin:-170px 0 0 -170px}
+  #council .rt-scene{transform:rotateX(54deg) translateY(64px) scale(.92)}
+  #council .rt-seat{width:114px}
+  #council .rt-hub{width:236px;top:54%}
+}

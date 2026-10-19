@@ -33,3 +33,22 @@ archive/
 .DS_Store
 Thumbs.db
 node_modules/
+
+# 会话 id（本机运行时状态，绝不提交）
+config/sessions.json
+
+# 本机参谋席位配置（含本机头像路径），示例见 config/council.example.json
+config/council.json
+
+# 本机流程模板，示例见 config/flows.example.json
+config/flows.json
+
+# 附件与参谋头像（可能是私人照片）
+intake/
+
+# 事故排查留下的副本
+console/*.corrupted
+console/*.recovered-holes
+console/*.repair*.ts
+console/_base.ts
+console/smoke.*.log

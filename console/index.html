@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AI 指挥台</title>
 <link rel="stylesheet" href="/ui.css">
+<link rel="stylesheet" href="/council.css">
+<link rel="stylesheet" href="/flows.css">
+<link rel="stylesheet" href="/attach.css">
 </head>
 <body>
 <header class="top">
@@ -13,16 +16,16 @@
     <div><div class="brand-name">AI 指挥台</div><div id="brandSub" class="brand-sub">你只管说需求，AI 们分工去做</div></div>
   </div>
   <div id="team" class="team"></div>
+  <button id="btnFlows" class="btn-settings" data-act="open-flows"><span class="gear">≡</span> 流程</button>
+  <button id="btnCouncil" class="btn-settings" data-act="open-council"><span class="gear">◎</span> 参谋团</button>
   <button id="btnSettings" class="btn-settings" data-act="open-settings"><span class="gear">⚙</span> 设置</button>
 </header>
-
 <div class="layout">
   <aside class="side">
     <button id="btnNew" class="btn-new">＋ 新任务</button>
     <div id="jobList" class="job-list"></div>
     <label class="side-foot"><input type="checkbox" id="showArchived"> 显示已归档</label>
   </aside>
-
   <main class="main">
     <section id="welcome" class="welcome hidden"></section>
     <section id="thread" class="thread hidden">
@@ -31,9 +34,12 @@
       <button id="toBottom" class="to-bottom" aria-label="回到最新">↓ 最新</button>
     </section>
     <footer id="composer" class="composer hidden">
-      <textarea id="composerText" rows="2" placeholder="接着说，比如：标题再短一点 / 再加一个页面……（Ctrl+回车发送）"></textarea>
+      <div id="composerAttachTray" class="att-tray"></div>
+      <textarea id="composerText" rows="2" placeholder="接着说，比如：标题再短一点 / 再加一个页面……　可以直接粘贴或拖入文件、截图（Ctrl+回车发送）"></textarea>
       <div class="composer-row">
+        <button id="composerAttachBtn" class="attach-btn" title="添加附件（也可以直接粘贴 / 拖进来）">📎</button>
         <label class="auto-opt"><input type="checkbox" id="composerAuto" checked> <span class="cmd-name">指挥官</span>拆完后直接开工</label>
+        <label class="auto-opt"><input type="checkbox" id="composerCouncil" checked> 这轮先开参谋会</label>
         <button id="composerSend" class="btn primary">发送</button>
       </div>
     </footer>
@@ -56,11 +62,45 @@
   </div>
 </div></div>
 
+<div id="flows" class="modal hidden"><div class="modal-card flows-card">
+  <div class="modal-head">
+    <b>流程模板 · 固定分工</b>
+    <span class="rt-head-sub">每步固定给一个 AI，一键开工，不经过拆单</span>
+    <span class="spacer"></span>
+    <button class="btn small" id="flowsClose">关闭</button>
+  </div>
+  <div id="flowsBody" class="flows-body"></div>
+  <div id="flRunBox" class="fl-runbox">
+    <div class="fl-runbox-inner">
+      <label>这次要做什么（会追加到每一步的「做什么」里）</label>
+      <textarea id="flRunText" rows="3" placeholder="例：做一期「普通人怎么做一个不后悔的重大决定」的短视频"></textarea>
+      <div class="fl-row">
+        <button class="btn primary small" id="flRunGo">确认开工</button>
+        <span class="fl-hint">按模板直接建卡并派单，出问题可以在对话里逐步重试</span>
+      </div>
+    </div>
+  </div>
+</div></div>
+
+<div id="council" class="modal hidden"><div class="modal-card council-card">
+  <div class="modal-head">
+    <b>参谋团 · 圆桌设置</b>
+    <span class="rt-head-sub">谁坐在桌上、每席用哪个 AI、开不开会</span>
+    <span class="spacer"></span>
+    <button class="btn small" id="councilClose">关闭</button>
+  </div>
+  <div id="councilBody" class="council-body"></div>
+</div></div>
+
 <div id="toast" class="toast hidden"></div>
 
 <script src="/core.js"></script>
 <script src="/render.js"></script>
 <script src="/settings.js"></script>
+<script src="/portrait.js"></script>
+<script src="/council.js"></script>
+<script src="/flows.js"></script>
+<script src="/attach.js"></script>
 <script src="/actions.js"></script>
 </body>
 </html>

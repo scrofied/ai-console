@@ -1,0 +1,80 @@
+/* 流程模板 —— 竖向流水线样式 */
+
+.fl-loading{padding:40px;text-align:center;color:var(--tx3);font-size:16px}
+.fl-loading.bad{color:var(--red)}
+.flows-card{width:min(1120px,96vw)}
+.flows-body{padding:12px 18px 0;overflow:auto;max-height:calc(84vh - 130px)}
+.fl-wrap{display:flex;gap:16px;align-items:flex-start}
+
+/* 左侧流程列表 */
+.fl-side{flex:0 0 210px;display:flex;flex-direction:column;gap:8px;position:sticky;top:0}
+.fl-side-head{font-size:13px;color:var(--tx3);letter-spacing:.5px;padding-left:2px}
+.fl-item{text-align:left;border:1px solid var(--line);background:var(--panel);border-radius:11px;padding:9px 11px;
+  display:flex;flex-direction:column;gap:3px;cursor:pointer;box-shadow:var(--sh1);
+  transition:border-color .16s,box-shadow .16s,transform .16s var(--ease)}
+.fl-item:hover{border-color:#b9cdf8;transform:translateX(2px);box-shadow:var(--sh2)}
+.fl-item.on{border-color:var(--blue);background:var(--blue-bg);box-shadow:0 0 0 3px var(--ring)}
+.fl-item b{font-size:15px}
+.fl-item span{font-size:12px;color:var(--tx3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fl-empty{color:var(--tx3);font-size:14px;padding:18px 4px}
+
+/* 右侧编辑区 */
+.fl-main{flex:1;min-width:0}
+.fl-head{display:flex;align-items:flex-end;gap:10px;margin-bottom:8px}
+.fl-field{display:block;font-size:13px;color:var(--tx3);margin-bottom:9px}
+.fl-field.inline{flex:1;margin-bottom:0}
+.fl-field input,.fl-field select,.fl-field textarea{display:block;width:100%;margin-top:4px;padding:7px 10px;
+  font:inherit;font-size:14.5px;color:var(--tx);border:1px solid var(--line2);border-radius:9px;background:var(--panel);
+  transition:border-color .15s,box-shadow .15s}
+.fl-field textarea{resize:vertical;line-height:1.55}
+.fl-field input:focus,.fl-field select:focus,.fl-field textarea:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px var(--ring)}
+
+/* 流水线 */
+.fl-pipe{display:flex;flex-direction:column;gap:0;margin:10px 0 12px}
+.fl-step{display:flex;gap:12px;align-items:stretch}
+.fl-rail{flex:0 0 34px;display:flex;flex-direction:column;align-items:center;padding-top:2px}
+.fl-idx{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:14px;color:#fff;
+  background:linear-gradient(145deg,#94a3b8,#64748b);box-shadow:0 3px 8px -2px rgba(20,28,50,.35),inset 0 1px 0 rgba(255,255,255,.3);flex:none}
+.fl-idx.codex{background:linear-gradient(145deg,#4b5563,#111827)}
+.fl-idx.workbuddy{background:linear-gradient(145deg,#2dd4bf,#0d8a7f)}
+.fl-idx.workbuddyai{background:linear-gradient(145deg,#60a5fa,#2563eb)}
+.fl-idx.qoder{background:linear-gradient(145deg,#a78bfa,#6d28d9)}
+.fl-idx.qoder-intl{background:linear-gradient(145deg,#c084fc,#7e22ce)}
+.fl-idx.traework{background:linear-gradient(145deg,#fb923c,#c2410c)}
+.fl-line{flex:1;width:2px;background:linear-gradient(180deg,#c9d6ef,rgba(201,214,239,.25));margin:4px 0;border-radius:2px;min-height:14px}
+
+.fl-card{flex:1;min-width:0;border:1px solid var(--line);border-radius:12px;background:var(--panel);
+  margin-bottom:10px;box-shadow:var(--sh1);transition:border-color .18s,box-shadow .18s}
+.fl-card:hover{border-color:#b9cdf8;box-shadow:var(--sh2)}
+.fl-step.open .fl-card{border-color:var(--blue);box-shadow:0 0 0 3px var(--ring)}
+.fl-card-head{display:flex;align-items:center;gap:9px;padding:10px 13px;cursor:pointer;user-select:none}
+.fl-title{font-size:15.5px}
+.fl-ai{font-size:12px;padding:2px 9px;border-radius:999px;background:var(--gray-bg);color:var(--tx2);border:1px solid var(--line)}
+.fl-ai.codex{background:#eef1f5;border-color:#cbd5e1}
+.fl-ai.workbuddy{background:#e6f7f4;border-color:#a7e0d6;color:#0d6b60}
+.fl-ai.workbuddyai{background:#e8f0fe;border-color:#b9cdf8;color:#1d4fd0}
+.fl-ai.qoder{background:#f1ecfe;border-color:#d6c9fb;color:#6d28d9}
+.fl-ai.qoder-intl{background:#f6ecfe;border-color:#e0c9fb;color:#7e22ce}
+.fl-ai.traework{background:#fff0e6;border-color:#fbd0ae;color:#c2410c}
+.fl-warn{font-size:12px;color:var(--amber);background:var(--amber-bg);border-radius:999px;padding:1px 8px}
+.fl-deps{display:flex;gap:5px;flex-wrap:wrap}
+.fl-dep{font-size:11px;padding:1px 8px;border-radius:999px;background:var(--blue-bg);color:var(--blue);border:1px solid #c9dafb}
+.fl-dep.none{background:var(--gray-bg);color:var(--tx3);border-color:var(--line)}
+.fl-chev{color:var(--tx3);font-size:13px;transition:transform .2s var(--ease)}
+.fl-card-body{border-top:1px solid var(--line);padding:12px 13px;background:#fafbfd;animation:fade .22s ease both}
+.fl-row{display:flex;gap:10px;margin-top:4px}
+.fl-depbox{display:flex;flex-wrap:wrap;gap:10px 16px;margin-top:5px;padding:8px 10px;border:1px dashed var(--line2);border-radius:9px;background:#fbfcfe}
+.fl-depchk{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--tx2);cursor:pointer}
+.fl-hint{font-size:12px;color:var(--tx3)}
+
+.fl-foot{display:flex;align-items:center;gap:10px;padding:12px 0;border-top:1px solid var(--line);margin-top:6px;position:sticky;bottom:0;background:linear-gradient(180deg,rgba(255,255,255,0),var(--panel) 40%)}
+
+/* 开工确认条 */
+.fl-runbox{display:none;padding:0 18px 12px}
+.fl-runbox.show{display:block;animation:rise .25s var(--ease) both}
+.fl-runbox-inner{border:1px solid #bcd0fa;background:#f6f9ff;border-radius:var(--radius);padding:12px 14px}
+.fl-runbox label{font-size:13px;color:var(--tx3)}
+.fl-runbox textarea{display:block;width:100%;margin-top:5px;padding:9px 11px;font:inherit;font-size:15px;
+  border:1px solid var(--line2);border-radius:9px;resize:vertical;background:#fff}
+.fl-runbox textarea:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px var(--ring)}
+.fl-runbox .fl-row{margin-top:9px;align-items:center}

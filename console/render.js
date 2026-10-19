@@ -16,6 +16,15 @@ function badge(cls, text, spin) {
   return `<span class="badge ${cls}">${spin ? '<span class="spin"></span>' : ""}${esc(text)}</span>`;
 }
 
+function guardChip() {
+  const g = S.guard || {};
+  if (g.dailyAutoRunBudget === undefined) return "";
+  const parts = [`今天已自动开工 ${g.usedToday ?? 0}/${g.dailyAutoRunBudget}`];
+  if (g.councilCap) parts.push(`参谋 ${g.councilUsed ?? 0}/${g.councilCap}`);
+  const act = g.councilActive ? ` <span class="badge working"><span class="spin"></span>参谋在议</span>` : "";
+  return `<span class="member ${g.councilActive ? "work" : "ok"}" title="今日自动开工预算；参谋席位走独立池，不挤干活的预算"><span class="dot"></span><span>${parts.join(" · ")}</span>${act}</span>`;
+}
+
 function renderTeam() {
   const html = Object.entries(S.workers).map(([k, w]) => {
     const broken = !w.canRun;
@@ -26,7 +35,7 @@ function renderTeam() {
     else if (w.active) { cls = "work"; text = w.role === "commander" ? "指挥中" : "干活中"; }
     const reset = w.blockedSec > 0 ? ` <button data-act="reset-circuit">恢复</button>` : "";
     return `<span class="member ${cls}" title="${esc(w.blockedWhy || w.note || "")}"><span class="dot"></span><b>${esc(w.title)}</b><span class="role">${esc(ROLE_LABEL[w.role] || "")}${w.model ? " · " + esc(w.model) : ""}</span><span>${esc(text)}</span>${reset}</span>`;
-  }).join("");
+  }).join("") + guardChip();
   if (html !== S.lastTeam) { $("team").innerHTML = html; S.lastTeam = html; }
   const workers = Object.values(S.workers).filter((w) => w.role === "worker" && w.canRun).map((w) => w.title);
   const sub = `你只管说需求，${cmdName()} 指挥${workers.length ? "，" + workers.join("、") + " 干活" : ""}`;
@@ -55,11 +64,14 @@ function renderWelcome() {
   $("welcome").innerHTML = `<div class="welcome-inner">
     <h1>你想让 AI 帮你做什么？</h1>
     <p class="lead">像聊天一样说一句话就行。${esc(cmdName())} 会把它拆成步骤，分给 ${esc(workerTitles() || "干活的 AI")} 去做，做完替你检查，结果都在这里。</p>
-    <textarea id="newText" class="big-input" placeholder="比如：帮我做一个介绍公司的单页网页，要有首页大图、三个产品卡片和联系方式"></textarea>
+    <textarea id="newText" class="big-input" placeholder="比如：帮我做一个介绍公司的单页网页，要有首页大图、三个产品卡片和联系方式　（可以直接粘贴或拖入文件、截图）"></textarea>
+    <div id="newAttachTray" class="att-tray"></div>
     <div class="start-row">
+      <button id="newAttachBtn" class="attach-btn" title="添加附件（也可以直接粘贴 / 拖进来）">📎</button>
       <button class="btn primary" data-act="start-job" style="font-size:18px;padding:12px 28px">开始</button>
       <span class="kbd-hint"><kbd>Ctrl</kbd> + <kbd>Enter</kbd> 也可以开始</span>
       <label class="auto-opt"><input type="checkbox" id="newAuto" checked> ${esc(cmdName())} 拆完后直接开工（不勾则先给你看方案）</label>
+      <label class="auto-opt"><input type="checkbox" id="newCouncil" checked> 先开参谋会（四位参谋各出一份主意，再由 ${esc(cmdName())} 揉成主线）</label>
     </div>
     <div class="examples"><span>试试：</span>${ex.map((e) => `<button class="chip" data-act="fill-example" data-text="${esc(e)}">${esc(e)}</button>`).join("")}</div>
     <div class="steps">
@@ -68,6 +80,7 @@ function renderWelcome() {
       <div class="step"><div class="n">3</div><b>做完自动检查</b><span>结果和文件直接出现在对话里</span></div>
     </div>
   </div>`;
+  if (typeof ensureTrays === "function") ensureTrays();   // 欢迎页重绘后把附件带重新绑上
 }
 
 function stepCard(c) {
@@ -155,21 +168,57 @@ function resultBlock(r, cards) {
     <div class="actions"><span style="color:var(--tx2);font-size:15px">不满意？直接在下面输入框接着说，或者点开某一步写意见让它重做。</span></div></div>`;
 }
 
+function seatCells(c, live) {
+  return (c.seats || []).map((s) => {
+    const l = live && live[s.id];
+    const cls = s.status === "done" ? "done" : (s.status === "failed" || s.status === "absent") ? "bad" : "working";
+    const stateTxt = s.status === "done" ? "说完了" : s.status === "failed" ? "没说完" : s.status === "absent" ? "缺席" : "正在说";
+    const line = s.summary || (cls === "bad" && s.error ? s.error : (l ? l.text : stateTxt));
+    return `<div class="seat ${cls}">
+      <div class="seat-top"><b>${esc(s.name)}</b><span class="seat-tool">${esc(s.tool || "-")}</span>${badge(cls === "done" ? "done" : cls === "bad" ? "bad" : "working", stateTxt, cls === "working")}</div>
+      <div class="seat-sum">${esc(line)}</div>
+      ${s.file ? `<div><button class="btn small ghost" data-act="view-file" data-path="${esc(s.file)}">看原文</button></div>` : ""}
+    </div>`;
+  }).join("");
+}
+
+function councilPanel(r, live) {
+  const c = r.council;
+  if (!c) return "";
+  if (c.skipped) return `<div class="council-skip">参谋团这轮没开成：${esc(c.skipped)}，直接交给指挥官拆了。</div>`;
+  if (!(c.seats || []).length) return "";
+  if (r.status === "council") {
+    return `<div class="council-box"><div class="council-title">${badge("working", "参谋团在议", true)}<span style="color:var(--tx3);font-weight:400;font-size:14px">各出各的主意，说完指挥官揉成一条主线</span></div><div class="council-grid">${seatCells(c, live)}</div></div>`;
+  }
+  const okN = (c.seats || []).filter((s) => s.ok).length;
+  return `<details class="council-min" data-more="council-${esc(r.id)}"><summary>参谋纪要 · 出席 ${okN}/${c.seats.length} 席（点开看每位说了什么）</summary><div class="council-grid">${seatCells(c, live)}</div></details>`;
+}
+
 function renderRound(r, d) {
   const live = d.planLive?.[r.id];
   const out = [`<div class="msg-user"><div class="bubble">${esc(r.text)}</div></div><div class="msg-time">${esc(r.at)}</div>`];
   let reply = "";
   const ck = commanderKey();
   const head = `<div class="reply-head"><span class="avatar ${esc(ck)}">${esc(cmdName()[0])}</span>${esc(cmdName())}</div>`;
-  if (r.status === "planning") {
+  const cblock = councilPanel(r, live);
+  if (r.status === "council") {
+    reply = `<div class="reply">${head}${cblock}</div>`;
+  } else if (r.status === "planning") {
     reply = `<div class="reply">${head}${badge("working", "正在拆任务", true)}${live ? `<div class="live">${esc(live.text)}</div>` : ""}</div>`;
   } else if (r.status === "plan_failed") {
     const ws = workerEntries();
-    reply = `<div class="reply">${head}<p>这次没拆成功。</p><div class="err-box">${esc(r.error || "未知原因")}</div>
+    reply = `<div class="reply">${head}${cblock}<p>这次没拆成功。</p><div class="err-box">${esc(r.error || "未知原因")}</div>
       <div class="actions"><button class="btn primary" data-act="replan" data-round="${esc(r.id)}">让 ${esc(cmdName())} 再拆一次</button>
       ${ws.map(([k, w]) => `<button class="btn" data-act="direct" data-round="${esc(r.id)}" data-worker="${esc(k)}">不拆了，直接交给 ${esc(w.title)}</button>`).join("")}</div></div>`;
   } else if (r.status === "draft") {
-    reply = `<div class="reply">${head}<p>${esc(r.summary || "我这样安排：")}</p>${draftCards(r)}
+    const qs = r.questions || [];
+    const waiting = qs.length > 0 && !(r.dispatched || []).length;
+    const qpanel = waiting ? `<div class="qpanel"><b>${esc(cmdName())} 想先问清楚（回答后会重新出一遍方案）</b>
+      <ul>${qs.map((q) => `<li>${esc(q)}</li>`).join("")}</ul>
+      <textarea class="fb q-text" data-q-round="${esc(r.id)}" rows="2" placeholder="一句话回答上面的问题"></textarea>
+      <div class="actions"><button class="btn primary" data-act="answer-round" data-round="${esc(r.id)}">回答，重出一遍方案</button>
+      <button class="btn" data-act="dispatch" data-round="${esc(r.id)}">不问，直接干</button></div></div>` : "";
+    reply = `<div class="reply">${head}${cblock}${qpanel}<p>${esc(r.summary || "我这样安排：")}</p>${draftCards(r)}
       <div class="actions"><button class="btn primary" data-act="dispatch" data-round="${esc(r.id)}">确认，开工</button>
       <button class="btn" data-act="replan" data-round="${esc(r.id)}">重新拆</button>
       <button class="btn danger" data-act="cancel-round" data-round="${esc(r.id)}">取消</button></div></div>`;
@@ -177,7 +226,7 @@ function renderRound(r, d) {
     reply = `<div class="reply">${head}<p style="color:var(--tx3)">这一轮已取消。</p></div>`;
   } else {
     const mine = d.cards.filter((c) => (r.dispatched || []).includes(c.id));
-    reply = `<div class="reply">${head}<p>${esc(r.summary || "已安排好，开始做：")}</p><div class="cards">${mine.map(stepCard).join("")}</div></div>`;
+    reply = `<div class="reply">${head}${cblock}<p>${esc(r.summary || "已安排好，开始做：")}</p><div class="cards">${mine.map(stepCard).join("")}</div></div>`;
     if (r.status === "finished") reply += resultBlock(r, d.cards);
   }
   out.push(reply);
@@ -196,7 +245,7 @@ function renderThread() {
 
   const body = d.job.rounds.map((r) => renderRound(r, d)).join("");
   const box = $("threadBody");
-  const typing = document.activeElement && document.activeElement.matches && document.activeElement.matches(".fb,.sel");
+  const typing = document.activeElement && document.activeElement.matches && document.activeElement.matches(".fb,.sel,.q-text");
   if (body !== S.lastBody && !typing) {
     const nearBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 120;
     const prev = box.scrollTop;
@@ -205,7 +254,7 @@ function renderThread() {
     box.scrollTop = nearBottom ? box.scrollHeight : prev;
   }
   const last = d.job.rounds[d.job.rounds.length - 1];
-  $("composerSend").disabled = !!last && last.status === "planning";
+  $("composerSend").disabled = !!last && (last.status === "planning" || last.status === "council");
 }
 
 function renderAll() {

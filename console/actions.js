@@ -10,10 +10,34 @@ function goWelcome() {
 async function openJob(id) {
   S.cur = id; S.lastBody = ""; S.lastHead = ""; S.open = new Set();
   await refresh();
+  const cc = $("composerCouncil");
+  if (cc) cc.checked = !!(S.detail?.job?.councilOn ?? S.guard.councilDefault ?? true);
   const box = $("threadBody");
   box.scrollTop = box.scrollHeight;
   $("composerText").focus();
 }
+
+/* 多模态输入：两条入口（新任务 / 追问）各一条附件带。
+ * 新任务的 job 还没建，先传到 tmp，服务端建对话时会挪进 Jxx 目录。 */
+let newTray = null;
+let followTray = null;
+let newTrayFor = null;      // 记住绑在哪个 textarea 上：欢迎页重绘后要重绑
+let followTrayFor = null;
+
+function ensureTrays() {
+  const nt = $("newText");
+  if (nt && $("newAttachTray") && newTrayFor !== nt) {
+    // 欢迎页每次重绘都是新元素，旧的监听器已经跟着旧节点一起没了
+    newTray = createAttachTray({ input: nt, tray: "newAttachTray", pick: "newAttachBtn", job: () => "tmp" });
+    newTrayFor = nt;
+  }
+  const ct = $("composerText");
+  if (ct && $("composerAttachTray") && followTrayFor !== ct) {
+    followTray = createAttachTray({ input: ct, tray: "composerAttachTray", pick: "composerAttachBtn", job: () => S.cur || "tmp" });
+    followTrayFor = ct;
+  }
+}
+ensureTrays();
 
 const handlers = {
   "open-job": (el) => openJob(el.dataset.job),
@@ -21,10 +45,19 @@ const handlers = {
   "fill-example": (el) => { const t = $("newText"); t.value = el.dataset.text; t.focus(); },
 
   "start-job": () => run(async () => {
+    ensureTrays();
     const text = $("newText").value.trim();
-    if (text.length < 2) { toast("先写一句想让 AI 做什么", true); return; }
-    if ("Notification" in window && Notification.permission === "default") Notification.requestPermission();
-    const r = await api("/api/jobs", { text, auto: $("newAuto").checked });
+    const files = newTray ? newTray.files() : [];
+    if (text.length < 2 && !files.length) { toast("先写一句想让 AI 做什么，或者拖个文件进来", true); return; }
+    if ("Notification" in window && Notification.requestPermission) {
+      if (Notification.permission === "default") Notification.requestPermission();
+    }
+    const r = await api("/api/jobs", {
+      text, files,
+      auto: $("newAuto").checked,
+      council: $("newCouncil") ? $("newCouncil").checked : undefined,
+    });
+    if (newTray) newTray.clear();
     await openJob(r.id);
   }),
 
@@ -46,6 +79,14 @@ const handlers = {
   "replan": (el) => run(async () => { await api(`/api/jobs/${S.cur}/round/${el.dataset.round}/replan`, {}); await refresh(); }),
   "direct": (el) => run(async () => { await api(`/api/jobs/${S.cur}/round/${el.dataset.round}/direct`, { worker: el.dataset.worker }); await refresh(); }),
   "cancel-round": (el) => run(async () => { await api(`/api/jobs/${S.cur}/round/${el.dataset.round}/cancel`, {}); await refresh(); }),
+  "answer-round": (el) => run(async () => {
+    const rid = el.dataset.round;
+    const ta = document.querySelector('.q-text[data-q-round="' + rid + '"]');
+    const text = (ta?.value || "").trim();
+    if (text.length < 2) { toast("先把答案写一句", true); return; }
+    await api(`/api/jobs/${S.cur}/round/${rid}/answer`, { text });
+    await refresh();
+  }),
 
   "retry": (el) => run(async () => {
     const id = el.dataset.card;
@@ -138,10 +179,17 @@ $("showArchived").onchange = (e) => { S.showArchived = e.target.checked; S.lastL
 async function sendFollowUp() {
   const box = $("composerText");
   const text = box.value.trim();
-  if (text.length < 2 || !S.cur) return;
+  ensureTrays();
+  const files = followTray ? followTray.files() : [];
+  if ((text.length < 2 && !files.length) || !S.cur) return;
   await run(async () => {
-    await api(`/api/jobs/${S.cur}/say`, { text, auto: $("composerAuto").checked });
+    await api(`/api/jobs/${S.cur}/say`, {
+      text, files,
+      auto: $("composerAuto").checked,
+      council: $("composerCouncil") ? $("composerCouncil").checked : undefined,
+    });
     box.value = ""; growComposer();
+    if (followTray) followTray.clear();
     await refresh();
     const b = $("threadBody"); b.scrollTop = b.scrollHeight;
   });
