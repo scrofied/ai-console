@@ -52,3 +52,18 @@ console/*.recovered-holes
 console/*.repair*.ts
 console/_base.ts
 console/smoke.*.log
+
+# 事故/备份副本
+config/*.bak-*
+console/*.bak-before-merge
+
+# 本机预览图（正式图在 docs/screenshots/）
+console/*-preview.png
+console/council-faces.png
+console/assets/table-sci-alt.png
+
+# 本地工具脚本
+_push_via_api.py
+
+# 共享运行记录（工作日志会不断增长）
+shared/
