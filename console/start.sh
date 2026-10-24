@@ -10,7 +10,7 @@ set -u
 DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$(dirname "$DIR")"
 PORT="${CONSOLE_PORT:-8787}"
-BUN="${BUN_BIN:-/c/Users/scrrofied/.bun/bin/bun.exe}"
+BUN="${BUN_BIN:-bun}"   # 默认走 PATH 里的 bun；要指定绝对路径就用 BUN_BIN=/your/path/bun bash console/start.sh
 LOG="$DIR/server.log"
 
 pid_listen() {

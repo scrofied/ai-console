@@ -647,7 +647,7 @@ bash console/start.sh --restart
 cd /d/agent/AI指挥台 && bash console/start.sh --restart
 ```
 
-或者直接：`C:\Users\scrrofied\.bun\bin\bun.exe run console/server.ts`（在根目录下）。
+或者直接：`bun run console/server.ts`（在根目录下）。
 
 **注意**：服务的 stdin 必须是空的（`start.sh` 里 `< /dev/null` 就是干这个的）。
 若继承启动终端的 stdin，终端一退，codex 读 stdio 会秒退 66。
